@@ -1,0 +1,9 @@
+.c8rc
+.editorconfig
+.eslintrc.cjs
+.mocharc.cjs
+.vscode/
+coverage/
+src/
+test/
+tsconfig.json
