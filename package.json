@@ -7,6 +7,8 @@
   "scripts": {
     "pretest": "tsc",
     "test": "c8 mocha",
+    "preci": "tsc --inlineSourceMap",
+    "ci": "c8 mocha",
     "lint": "eslint . --ext ts,js,cjs",
     "build": "npm run lint && npm test && npm pack --dry-run"
   },
