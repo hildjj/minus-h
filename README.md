@@ -73,4 +73,4 @@ that would have been written, and prevent your test harness from actually
 exiting.
 
 ---
-badges
+[![Tests](https://github.com/hildjj/minus-h/actions/workflows/node.js.yml/badge.svg)](https://github.com/hildjj/minus-h/actions/workflows/node.js.yml)
