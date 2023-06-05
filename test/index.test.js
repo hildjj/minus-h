@@ -43,18 +43,21 @@ describe('parseArgsWithHelp', () => {
   })
 
   it('generates help', async() => {
+    const opts = {
+      width: 80,
+    }
     await assertHelp({}, [
       'Usage: mocha [options]',
       '',
       'Options:',
       '  -h,--help  display help for command'
-    ])
+    ], opts)
     await assertHelp({ allowPositionals: true }, [
       'Usage: mocha [options] [arguments]',
       '',
       'Options:',
       '  -h,--help  display help for command'
-    ])
+    ], opts)
     await assertHelp({ description: 'foo bar baz' }, [
       'Usage: mocha [options]',
       '',
@@ -62,7 +65,7 @@ describe('parseArgsWithHelp', () => {
       '',
       'Options:',
       '  -h,--help  display help for command'
-    ])
+    ], opts)
     await assertHelp({
       allowPositionals: true,
       argumentDescription: 'foo bar baz',
@@ -75,7 +78,7 @@ describe('parseArgsWithHelp', () => {
       '',
       'Options:',
       '  -h,--help  display help for command'
-    ])
+    ], opts)
     await assertHelp({
       options: {
         'ignore': {
@@ -101,7 +104,7 @@ describe('parseArgsWithHelp', () => {
       '  -h,--help            display help for command',
       '  --ignore',
       '  --pear <pit>         oh.  pear. Default: "pair"'
-    ])
+    ], opts)
   })
 
   it('handles narrow terms', async() => {

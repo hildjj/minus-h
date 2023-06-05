@@ -106,21 +106,40 @@ export interface ParseArgsConfig {
   exit?: typeof process.exit;
 }
 
-export function *generateHelp<T extends ParseArgsConfig>(
+type ParsedResults<T extends ParseArgsConfig> = ReturnType<typeof parseArgs<T>>
+interface HelpResult {
+  help: boolean;
+}
+
+function normalizeOptions<T extends ParseArgsConfig>(config?: T): T {
+  config ??= {} as T
+  config.options ??= {}
+  config.options.help ??= {
+    short: 'h',
+    type: 'boolean',
+    description: 'display help for command',
+  }
+  config.outputStream ??= process.stderr
+  config.exit ??= process.exit
+  return config
+}
+
+function *generateHelp<T extends ParseArgsConfig>(
   config: T,
   opts: LineWrapOptions
 ): Generator<string, void, undefined> {
+  const cfg = normalizeOptions(config)
   const lw = new LineWrap({
     width: process.stdout.columns,
     ...opts,
   })
 
   const { name } = path.parse(process.argv[1])
-  let usage = `Usage: ${name}`
+  let usg = `Usage: ${name}`
   let max = -Infinity
-  if (config.options) {
-    usage += ' [options]'
-    for (const [long, info] of Object.entries(config.options)) {
+  if (cfg.options) {
+    usg += ' [options]'
+    for (const [long, info] of Object.entries(cfg.options)) {
       let len = long.length + 2 // --
       if (info.short) {
         len += 3 // ,-s
@@ -132,16 +151,16 @@ export function *generateHelp<T extends ParseArgsConfig>(
       max = Math.max(len, max)
     }
   }
-  if (config.allowPositionals || (config.strict === false)) {
-    const argName = config.argumentName ?? 'arguments'
-    usage += ` [${argName}]`
+  if (cfg.allowPositionals || (cfg.strict === false)) {
+    const argName = cfg.argumentName ?? 'arguments'
+    usg += ` [${argName}]`
     max = Math.max(argName.length, max)
   }
-  yield usage
+  yield usg
   yield ''
 
-  if (config.description) {
-    yield *lw.lines(config.description)
+  if (cfg.description) {
+    yield *lw.lines(cfg.description)
     yield ''
   }
 
@@ -154,18 +173,18 @@ export function *generateHelp<T extends ParseArgsConfig>(
     width: Math.max(max + 2, w),  // At least two chars per line
   })
 
-  if (config.argumentDescription) {
+  if (cfg.argumentDescription) {
     yield 'Arguments:'
-    const wrapped = indented.lines(config.argumentDescription)
-    yield `  ${config.argumentName}`.padEnd(max, ' ') + wrapped.next().value
+    const wrapped = indented.lines(cfg.argumentDescription)
+    yield `  ${cfg.argumentName}`.padEnd(max, ' ') + wrapped.next().value
     yield *wrapped
     yield ''
   }
 
-  if (config.options) {
+  if (cfg.options) {
     yield 'Options:'
     const sorted = Object
-      .entries(config.options)
+      .entries(cfg.options)
       .sort(([longA, infoA], [longB, infoB]) => {
         const a = infoA.short ?? longA
         const b = infoB.short ?? longB
@@ -199,37 +218,26 @@ export function *generateHelp<T extends ParseArgsConfig>(
   }
 }
 
-type ParsedResults<T extends ParseArgsConfig> = ReturnType<typeof parseArgs<T>>
-interface HelpResult {
-  help: boolean;
+export function usage<T extends ParseArgsConfig>(
+  config?: T,
+  options?: LineWrapOptions
+): void {
+  const cfg = normalizeOptions(config)
+  for (const line of generateHelp<T>(cfg, options)) {
+    cfg.outputStream?.write(line)
+    cfg.outputStream?.write(options?.newline ?? EOL)
+  }
+  cfg.exit?.(64)
 }
 
 export function parseArgsWithHelp<T extends ParseArgsConfig>(
   config?: T,
   options?: LineWrapOptions
 ): ParsedResults<T> {
-  if (!config) {
-    config = {} as T
-  }
-  if (!config.options) {
-    config.options = {}
-  }
-  if (!config.options.help) {
-    config.options.help = {
-      short: 'h',
-      type: 'boolean',
-      description: 'display help for command',
-    }
-  }
-  const results = parseArgs(config)
+  const cfg = normalizeOptions(config)
+  const results = parseArgs(cfg)
   if ((results.values as HelpResult).help) {
-    config.outputStream ??= process.stderr
-    config.exit ??= process.exit
-    for (const line of generateHelp<T>(config, options)) {
-      config.outputStream.write(line)
-      config.outputStream.write(EOL)
-    }
-    config.exit(64)
+    usage(cfg, options)
   }
   return results
 }

@@ -7,3 +7,4 @@ coverage/
 src/
 test/
 tsconfig.json
+.github/
