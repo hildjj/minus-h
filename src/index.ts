@@ -109,7 +109,7 @@ export interface ParseArgsConfig {
 export function *generateHelp<T extends ParseArgsConfig>(
   config: T,
   opts: LineWrapOptions
-): Generator<string> {
+): Generator<string, void, undefined> {
   const lw = new LineWrap({
     width: process.stdout.columns,
     ...opts,

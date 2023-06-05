@@ -13,6 +13,10 @@
   "keywords": [],
   "author": "Joe Hildebrand <joe-github@cursive.net>",
   "license": "MIT",
+  "repository": "hildjj/minus-h",
+  "dependencies": {
+    "@cto.af/linewrap": "1.0.0"
+  },
   "devDependencies": {
     "@cto.af/eslint-config": "1.1.2",
     "@types/node": "20.2.5",
