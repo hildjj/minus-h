@@ -1,7 +1,7 @@
 {
   "name": "minus-h",
   "version": "0.0.0",
-  "description": "",
+  "description": "Add help generation to APIs created with Node's util.parseArgs function",
   "main": "lib/index.js",
   "type": "module",
   "scripts": {
@@ -12,7 +12,15 @@
     "lint": "eslint . --ext ts,js,cjs",
     "build": "npm run lint && npm test && npm pack --dry-run"
   },
-  "keywords": [],
+  "keywords": [
+    "parseArgs",
+    "node",
+    "util",
+    "help",
+    "-h",
+    "format",
+    "word-wrap"
+  ],
   "author": "Joe Hildebrand <joe-github@cursive.net>",
   "license": "MIT",
   "repository": "hildjj/minus-h",
