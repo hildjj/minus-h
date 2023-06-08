@@ -182,6 +182,14 @@ describe('parseArgsWithHelp', () => {
       '  -h,--help      display help for command',
     ], { width: 80 })
 
+    config.options.foo.description = "Things"
+    await assertHelp(config, [
+      'Usage: mocha [options]',
+      '',
+      'Options:',
+      '  --foo <value>  Things (choices: "boo", "bar")',
+      '  -h,--help      display help for command',
+    ], { width: 80 })
 
     const res = await run({
       ...config,
