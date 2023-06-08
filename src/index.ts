@@ -6,6 +6,7 @@ import { parseArgs } from 'util'
 import type { Writable } from 'stream'
 
 type LineWrapOptions = ConstructorParameters<typeof LineWrap>[0]
+const DEFAULT_ARG_NAME = 'value'
 
 // This is copied in from
 // https://github.com/DefinitelyTyped/DefinitelyTyped/blob/e858f398c44ef759a64dd49854fd3470e6b65731/types/node/util.d.ts#L1254
@@ -47,6 +48,12 @@ interface ParseArgsOptionConfig {
    * @since minus-h
    */
   argumentName?: string | undefined;
+  /**
+   * If type is string, and choices is specified, the value must be one of
+   * these choices.
+   * @since minus-h
+   */
+  choices?: string[] | undefined;
 }
 interface ParseArgsOptionsConfig {
   [longOption: string]: ParseArgsOptionConfig;
@@ -96,6 +103,12 @@ export interface ParseArgsConfig {
    */
   argumentDescription?: string | undefined;
   /**
+   * The name of the script.  Defaults to process.argv[1].
+   *
+   * @since minus-h
+   */
+  scriptName?: string | undefined;
+  /**
    * Where to output help?  Useful for testing.  Defaults to stderr.
    */
   outputStream?: Writable;
@@ -134,7 +147,7 @@ function *generateHelp<T extends ParseArgsConfig>(
     ...opts,
   })
 
-  const { name } = path.parse(process.argv[1])
+  const { name } = path.parse(config.scriptName ?? process.argv[1])
   let usg = `Usage: ${name}`
   let max = -Infinity
   if (cfg.options) {
@@ -145,7 +158,7 @@ function *generateHelp<T extends ParseArgsConfig>(
         len += 3 // ,-s
       }
       if (info.type === 'string') {
-        const argName = info.argumentName ?? 'string'
+        const argName = info.argumentName ?? DEFAULT_ARG_NAME
         len += argName.length + 3
       }
       max = Math.max(len, max)
@@ -196,11 +209,19 @@ function *generateHelp<T extends ParseArgsConfig>(
         param = `-${info.short},${param}`
       }
       if (info.type === 'string') {
-        const argName = info.argumentName ?? 'string'
+        const argName = info.argumentName ?? DEFAULT_ARG_NAME
         param += ` <${argName}>`
       }
       param = `  ${param}`
       let desc = info.description ?? ''
+      if (info.choices && (info.choices.length > 0)) {
+        if (desc) {
+          desc += ' '
+        }
+        desc += '(choices: '
+        desc += info.choices.map(c => JSON.stringify(c)).join(', ')
+        desc += ')'
+      }
       if (info.default != null) {
         if (desc) {
           desc += ' '
@@ -230,14 +251,52 @@ export function usage<T extends ParseArgsConfig>(
   cfg.exit?.(64)
 }
 
+interface CodeError extends Error {
+  code: string;
+}
+
+function isCodeError(e: any): e is CodeError {
+  return (e instanceof Error) && (e.hasOwnProperty('code'))
+}
+
+const USAGE_ERRORS = [
+  'ERR_PARSE_ARGS_INVALID_OPTION_VALUE',
+  'ERR_PARSE_ARGS_UNEXPECTED_POSITIONAL',
+  'ERR_PARSE_ARGS_UNKNOWN_OPTION',
+]
+
 export function parseArgsWithHelp<T extends ParseArgsConfig>(
   config?: T,
   options?: LineWrapOptions
 ): ParsedResults<T> {
   const cfg = normalizeOptions(config)
-  const results = parseArgs(cfg)
-  if ((results.values as HelpResult).help) {
+  let results: ParsedResults<T> | null = null
+  try {
+    results = parseArgs(cfg)
+  } catch (e) {
+    if (isCodeError(e) && USAGE_ERRORS.includes(e.code)) {
+      cfg.outputStream?.write(e.message)
+      cfg.outputStream?.write(EOL)
+      cfg.outputStream?.write(EOL)
+      usage(cfg, options)
+    }
+    throw e
+  }
+  if ((results?.values as HelpResult)?.help) {
     usage(cfg, options)
+  }
+  if (cfg.options) {
+    for (const [long, info] of Object.entries(cfg.options)) {
+      if (info.choices) {
+        const val = (results.values as { [key: string]: boolean | string })[long]
+        if ((typeof val === 'string') && !info.choices.includes(val)) {
+          cfg.outputStream?.write(`Option '--${long} <${info.argumentName ?? DEFAULT_ARG_NAME}>' argument must be one of ${JSON.stringify(info.choices)}`)
+          cfg.outputStream?.write(EOL)
+          cfg.outputStream?.write(EOL)
+          usage(cfg, options)
+        }
+      }
+    }
   }
   return results
 }

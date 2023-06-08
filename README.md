@@ -33,6 +33,7 @@ parseArgsWithHelp({
       type: 'string',
       argumentName: 'encoding',
       description: 'encoding for files read or written',
+      choices: ["utf8", "base64"]
     },
   },
 }, { width: 80 })
@@ -50,7 +51,8 @@ Arguments:
   files                  the files to be processed
 
 Options:
-  --encoding <encoding>  encoding for files read or written
+  --encoding <encoding>  encoding for files read or written (choices: "utf8",
+                         "base64") Default: "utf8"
   -h,--help              display help for command
 ```
 
