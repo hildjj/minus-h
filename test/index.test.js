@@ -1,28 +1,54 @@
 import assert from 'assert/strict'
 import {parseArgsWithHelp} from '../lib/index.js'
 import {EOL} from 'os'
+import {Transform} from 'stream'
 
-function addEOL(array) {
-  return
+// Record things written through a stream.  Only works for 16kb chunks.
+class Record extends Transform {
+  // eslint-disable-next-line class-methods-use-this
+  _transform(chunk, encoding, callback) {
+    callback(null, chunk)
+  }
 }
-function assertHelp(config, expectedHelp, opts) {
-  return new Promise(resolve => {
-    const stderr = []
-    parseArgsWithHelp({
-      args: ["-h"],
-      outputStream: {
-        write(chunk) {
-          stderr.push(chunk)
-        }
-      },
-      exit(code) {
-        assert.equal(code, 64)
-        assert.deepEqual(stderr.filter(s => s !== EOL), expectedHelp)
-        resolve()
-      },
-      ...config
-    }, opts)
+
+const MAGIC_JUMP = 'XXXXXXXXXXXXXX'
+function run(config, opts) {
+  return new Promise((resolve, reject) => {
+    const res = {
+      stderr: '',
+      code: 0,
+      results: null,
+      error: null,
+    }
+    config.outputStream = new Record()
+    config.outputStream.setEncoding('utf8')
+      config.exit = (code) => {
+      res.code = code
+      res.stderr = config.outputStream.read()
+      resolve(res)
+      throw new Error(MAGIC_JUMP)
+    }
+
+    try {
+      res.results = parseArgsWithHelp(config, opts)
+      resolve(res)
+    } catch (e) {
+      if (e.message !== MAGIC_JUMP) {
+        res.error = e
+      }
+      resolve(res)
+    }
   })
+
+}
+
+async function assertHelp(config, expectedHelp, opts) {
+  const res = await run({
+    args: ['-h'],
+    ...config
+  }, opts)
+  assert.equal(res.code, 64)
+  assert.equal(res.stderr, expectedHelp.join(EOL) + EOL)
 }
 
 describe('parseArgsWithHelp', () => {
@@ -31,7 +57,6 @@ describe('parseArgsWithHelp', () => {
       positionals: [],
       values: Object.setPrototypeOf({}, null),
     })
-    assert.throws(() => parseArgsWithHelp({args: ['foo', 'bar']}))
 
     // In case mocha has other params passed in.
     if (process.argv.length === 2) {
@@ -40,6 +65,26 @@ describe('parseArgsWithHelp', () => {
         values: Object.setPrototypeOf({}, null),
       })
     }
+  })
+
+  it('errors on unexpected positionals', async() => {
+    // Unexpected positionals
+    const res = await run({
+      args: ['foo', 'bar']
+    })
+    assert.equal(res.code, 64)
+  })
+
+  it('errors on invalid options', () => {
+    assert.throws(() => {
+      parseArgsWithHelp({
+        options: {
+          foo: {
+            short: 'bar'
+          }
+        }
+      })
+    })
   })
 
   it('generates help', async() => {
@@ -100,10 +145,10 @@ describe('parseArgsWithHelp', () => {
       'Usage: mocha [options]',
       '',
       'Options:',
-      '  -a,--apple <string>  Default: "banana"',
-      '  -h,--help            display help for command',
+      '  -a,--apple <value>  Default: "banana"',
+      '  -h,--help           display help for command',
       '  --ignore',
-      '  --pear <pit>         oh.  pear. Default: "pair"'
+      '  --pear <pit>        oh.  pear. Default: "pair"'
     ], opts)
   })
 
@@ -117,5 +162,37 @@ describe('parseArgsWithHelp', () => {
       '             for',
       '             command'
     ], { width: 10 })
+  })
+
+  it('handles choices', async() => {
+    const config = {
+      options: {
+        foo: {
+          type: 'string',
+          choices: ['boo', 'bar'],
+        }
+      }
+    }
+
+    await assertHelp(config, [
+      'Usage: mocha [options]',
+      '',
+      'Options:',
+      '  --foo <value>  (choices: "boo", "bar")',
+      '  -h,--help      display help for command',
+    ], { width: 80 })
+
+
+    const res = await run({
+      ...config,
+      args: ['--foo', 'boo']
+    })
+    assert.equal(res.code, 0)
+
+    const res2 = await run({
+      ...config,
+      args: ['--foo', 'bbb']
+    })
+    assert.equal(res2.code, 64)
   })
 })
