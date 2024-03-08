@@ -1,10 +1,12 @@
 .c8rc
 .editorconfig
 .eslintrc.cjs
+.github/
 .mocharc.cjs
+.ncurc
 .vscode/
 coverage/
+eslint.config.js
 src/
 test/
 tsconfig.json
-.github/
