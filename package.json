@@ -10,7 +10,7 @@
     "preci": "tsc --inlineSourceMap",
     "ci": "c8 mocha",
     "lint": "eslint .",
-    "build": "npm run lint && npm test && npm pack --dry-run"
+    "build": "npm test && npm run lint && npm pack --dry-run"
   },
   "keywords": [
     "parseArgs",
