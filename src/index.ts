@@ -1,9 +1,8 @@
 import * as path from 'path';
-import { EOL } from 'os';
-import { LineWrap } from '@cto.af/linewrap';
-import { parseArgs } from 'util';
-
-import type { Writable } from 'stream';
+import {EOL} from 'os';
+import {LineWrap} from '@cto.af/linewrap';
+import type {Writable} from 'stream';
+import {parseArgs} from 'util';
 
 type LineWrapOptions = ConstructorParameters<typeof LineWrap>[0];
 const DEFAULT_ARG_NAME = 'value';
@@ -19,6 +18,7 @@ interface ParseArgsOptionConfig {
    * Type of argument.
    */
   type: 'boolean' | 'string';
+
   /**
    * Whether this option can be provided multiple times.
    * If `true`, all values will be collected in an array.
@@ -26,10 +26,12 @@ interface ParseArgsOptionConfig {
    * @default false.
    */
   multiple?: boolean | undefined;
+
   /**
    * A single character alias for the option.
    */
   short?: string | undefined;
+
   /**
    * The default option value when it is not set by args.
    * It must be of the same type as the the `type` property.
@@ -37,17 +39,20 @@ interface ParseArgsOptionConfig {
    * @since v18.11.0
    */
   default?: boolean[] | string[] | boolean | string | undefined;
+
   /**
    * Description of the argument, for generating help text.
    * @since minus-h
    */
   description?: string | undefined;
+
   /**
    * If the type is 'string, what should the argument be called in the
    * documentation?
    * @since minus-h
    */
   argumentName?: string | undefined;
+
   /**
    * If type is string, and choices is specified, the value must be one of
    * these choices.
@@ -63,23 +68,29 @@ export interface ParseArgsConfig {
    * Array of argument strings.
    */
   args?: string[] | undefined;
+
   /**
    * Used to describe arguments known to the parser.
    */
   options?: ParseArgsOptionsConfig | undefined;
+
   /**
-   * Should an error be thrown when unknown arguments are encountered,
-   * or when arguments are passed that do not match the `type` configured in `options`.
+   * Should an error be thrown when unknown arguments are encountered, or when
+   * arguments are passed that do not match the `type` configured in
+   * `options`.
    * @default true
    */
   strict?: boolean | undefined;
+
   /**
    * Whether this command accepts positional arguments.
    */
   allowPositionals?: boolean | undefined;
+
   /**
-   * Return the parsed tokens. This is useful for extending the built-in behavior,
-   * from adding additional checks through to reprocessing the tokens in different ways.
+   * Return the parsed tokens. This is useful for extending the built-in
+   * behavior, from adding additional checks through to reprocessing the
+   * tokens in different ways.
    * @default false
    */
   tokens?: boolean | undefined;
@@ -89,6 +100,7 @@ export interface ParseArgsConfig {
    * @since minus-h
    */
   description?: string | undefined;
+
   /**
    * If positiionals are allowed, what name should be used to refer to them in
    * the documentation?  Defaults to "arguments".
@@ -96,22 +108,26 @@ export interface ParseArgsConfig {
    * @since minus-h
    */
   argumentName?: string | undefined;
+
   /**
    * Long description for the positional arguments.
    *
    * @since minus-h
    */
   argumentDescription?: string | undefined;
+
   /**
    * The name of the script.  Defaults to process.argv[1].
    *
    * @since minus-h
    */
   scriptName?: string | undefined;
+
   /**
    * Where to output help?  Useful for testing.  Defaults to stderr.
    */
   outputStream?: Writable;
+
   /**
    * What to do after writing help to outputStream.  Useful for testing.
    * Defaults to process.exit.  Called with 64 as the only parameter.
@@ -120,6 +136,10 @@ export interface ParseArgsConfig {
 }
 
 type ParsedResults<T extends ParseArgsConfig> = ReturnType<typeof parseArgs<T>>;
+interface ParsedValues {
+  [key: string]: boolean | string;
+}
+
 interface HelpResult {
   help: boolean;
 }
@@ -147,7 +167,7 @@ function *generateHelp<T extends ParseArgsConfig>(
     ...opts,
   });
 
-  const { name } = path.parse(config.scriptName ?? process.argv[1]);
+  const {name} = path.parse(config.scriptName ?? process.argv[1]);
   let usg = `Usage: ${name}`;
   let max = -Infinity;
   if (cfg.options) {
@@ -183,7 +203,7 @@ function *generateHelp<T extends ParseArgsConfig>(
     ...opts,
     indent: max,
     indentFirst: false,
-    width: Math.max(max + 2, w),  // At least two chars per line
+    width: Math.max(max + 2, w), // At least two chars per line
   });
 
   if (cfg.argumentDescription) {
@@ -256,7 +276,7 @@ interface CodeError extends Error {
 }
 
 function isCodeError(e: any): e is CodeError {
-  return (e instanceof Error) && (e.hasOwnProperty('code'));
+  return (e instanceof Error) && (Object.prototype.hasOwnProperty.call(e, 'code'));
 }
 
 const USAGE_ERRORS = [
@@ -288,7 +308,7 @@ export function parseArgsWithHelp<T extends ParseArgsConfig>(
   if (cfg.options) {
     for (const [long, info] of Object.entries(cfg.options)) {
       if (info.choices) {
-        const val = (results.values as { [key: string]: boolean | string })[long];
+        const val = (results.values as ParsedValues)[long];
         if ((typeof val === 'string') && !info.choices.includes(val)) {
           cfg.outputStream?.write(`Option '--${long} <${info.argumentName ?? DEFAULT_ARG_NAME}>' argument must be one of ${JSON.stringify(info.choices)}`);
           cfg.outputStream?.write(EOL);
