@@ -1,8 +1,8 @@
-import * as path from 'path';
-import {EOL} from 'os';
+import {EOL} from 'node:os';
 import {LineWrap} from '@cto.af/linewrap';
-import type {Writable} from 'stream';
-import {parseArgs} from 'util';
+import type {Writable} from 'node:stream';
+import {parse} from 'node:path';
+import {parseArgs} from 'node:util';
 
 type LineWrapOptions = ConstructorParameters<typeof LineWrap>[0];
 const DEFAULT_ARG_NAME = 'value';
@@ -167,7 +167,7 @@ function *generateHelp<T extends ParseArgsConfig>(
     ...opts,
   });
 
-  const {name} = path.parse(config.scriptName ?? process.argv[1]);
+  const {name} = parse(config.scriptName ?? process.argv[1]);
   let usg = `Usage: ${name}`;
   let max = -Infinity;
   if (cfg.options) {

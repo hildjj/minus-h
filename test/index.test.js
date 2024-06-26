@@ -1,6 +1,6 @@
-import {EOL} from 'os';
-import {Transform} from 'stream';
-import assert from 'assert/strict';
+import {EOL} from 'node:os';
+import {Transform} from 'node:stream';
+import assert from 'node:assert/strict';
 import {parseArgsWithHelp} from '../lib/index.js';
 
 // Record things written through a stream.  Only works for 16kb chunks.
