@@ -23,7 +23,10 @@
   ],
   "author": "Joe Hildebrand <joe-github@cursive.net>",
   "license": "MIT",
-  "repository": "hildjj/minus-h",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hildjj/minus-h.git"
+  },
   "dependencies": {
     "@cto.af/linewrap": "2.0.0"
   },
