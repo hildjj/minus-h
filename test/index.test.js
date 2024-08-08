@@ -6,14 +6,14 @@ import {parseArgsWithHelp} from '../lib/index.js';
 // Record things written through a stream.  Only works for 16kb chunks.
 class Record extends Transform {
   // eslint-disable-next-line class-methods-use-this
-  _transform(chunk, encoding, callback) {
+  _transform(chunk, _encoding, callback) {
     callback(null, chunk);
   }
 }
 
 const MAGIC_JUMP = 'XXXXXXXXXXXXXX';
 function run(config, opts) {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve, _reject) => {
     const res = {
       stderr: '',
       code: 0,

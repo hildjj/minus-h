@@ -7,13 +7,14 @@ import {parseArgs} from 'node:util';
 type LineWrapOptions = ConstructorParameters<typeof LineWrap>[0];
 const DEFAULT_ARG_NAME = 'value';
 
-// This is copied in from
-// https://github.com/DefinitelyTyped/DefinitelyTyped/blob/e858f398c44ef759a64dd49854fd3470e6b65731/types/node/util.d.ts#L1254
-//
-// The original types there do not export enough of the intermediate types so
-// that the new properties can be grafted on more easily than this.
-
-interface ParseArgsOptionConfig {
+/**
+ * This is copied in from
+ * https://github.com/DefinitelyTyped/DefinitelyTyped/blob/e858f398c44ef759a64dd49854fd3470e6b65731/types/node/util.d.ts#L1254
+ *
+ * The original types there do not export enough of the intermediate types so
+ * that the new properties can be grafted on more easily than this.
+ */
+export interface ParseArgsOptionConfig {
   /**
    * Type of argument.
    */
@@ -60,9 +61,18 @@ interface ParseArgsOptionConfig {
    */
   choices?: string[] | undefined;
 }
-interface ParseArgsOptionsConfig {
+
+/**
+ * Copied here because ParseArgsOptionsConfig isn't public in utils.d.ts.
+ */
+export interface ParseArgsOptionsConfig {
   [longOption: string]: ParseArgsOptionConfig;
 }
+
+/**
+ * The configuration for the arg parser, augmented with descriptions of
+ * the arguments.
+ */
 export interface ParseArgsConfig {
   /**
    * Array of argument strings.
@@ -135,7 +145,13 @@ export interface ParseArgsConfig {
   exit?: typeof process.exit;
 }
 
-type ParsedResults<T extends ParseArgsConfig> = ReturnType<typeof parseArgs<T>>;
+/**
+ * Parsed command line arguments.  Defined strangely here because
+ * ParsedResults is not made public in util.d.ts.
+ */
+export type ParsedResults<T extends ParseArgsConfig>
+  = ReturnType<typeof parseArgs<T>>;
+
 interface ParsedValues {
   [key: string]: boolean | string;
 }
@@ -157,8 +173,8 @@ function normalizeOptions<T extends ParseArgsConfig>(config?: T): T {
   return config;
 }
 
-function *generateHelp<T extends ParseArgsConfig>(
-  config: T,
+function *generateHelp(
+  config: ParseArgsConfig,
   opts: LineWrapOptions
 ): Generator<string, void, undefined> {
   const cfg = normalizeOptions(config);
@@ -259,12 +275,12 @@ function *generateHelp<T extends ParseArgsConfig>(
   }
 }
 
-export function usage<T extends ParseArgsConfig>(
-  config?: T,
+export function usage(
+  config?: ParseArgsConfig,
   options?: LineWrapOptions
 ): void {
   const cfg = normalizeOptions(config);
-  for (const line of generateHelp<T>(cfg, options)) {
+  for (const line of generateHelp(cfg, options)) {
     cfg.outputStream?.write(line);
     cfg.outputStream?.write(options?.newline ?? EOL);
   }
@@ -285,6 +301,17 @@ const USAGE_ERRORS = [
   'ERR_PARSE_ARGS_UNKNOWN_OPTION',
 ];
 
+/**
+ * Wrap `util.parseArgs()`, adding a "-h,--help" argument.  It takes one or
+ * two arguments.  The wrapping width defaults to your terminal width (via
+ * [process.stdout.columns](https://nodejs.org/api/tty.html#writestreamcolumns)).
+ *
+ * @param config An augmented version of the options passed to
+ *   `util.parseArgs()`, with descriptions provided for options as well as the
+ *   command as a whole.
+ * @param options How to do line wrapping?
+ * @returns The parsed results.
+ */
 export function parseArgsWithHelp<T extends ParseArgsConfig>(
   config?: T,
   options?: LineWrapOptions
