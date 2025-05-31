@@ -1,3 +1,5 @@
+// eslint-disable-next-line n/no-unsupported-features/node-builtins
+import {describe, it} from 'node:test';
 import {EOL} from 'node:os';
 import {Transform} from 'node:stream';
 import assert from 'node:assert/strict';
@@ -91,19 +93,19 @@ describe('parseArgsWithHelp', () => {
       width: 80,
     };
     await assertHelp({}, [
-      'Usage: mocha [options]',
+      'Usage: index.test [options]',
       '',
       'Options:',
       '  -h,--help  display help for command',
     ], opts);
     await assertHelp({allowPositionals: true}, [
-      'Usage: mocha [options] [arguments]',
+      'Usage: index.test [options] [arguments]',
       '',
       'Options:',
       '  -h,--help  display help for command',
     ], opts);
     await assertHelp({description: 'foo bar baz'}, [
-      'Usage: mocha [options]',
+      'Usage: index.test [options]',
       '',
       'foo bar baz',
       '',
@@ -115,7 +117,7 @@ describe('parseArgsWithHelp', () => {
       argumentDescription: 'foo bar baz',
       argumentName: 'looble',
     }, [
-      'Usage: mocha [options] [looble]',
+      'Usage: index.test [options] [looble]',
       '',
       'Arguments:',
       '  looble     foo bar baz',
@@ -141,7 +143,7 @@ describe('parseArgsWithHelp', () => {
         },
       },
     }, [
-      'Usage: mocha [options]',
+      'Usage: index.test [options]',
       '',
       'Options:',
       '  -a,--apple <value>  Default: "banana"',
@@ -153,7 +155,7 @@ describe('parseArgsWithHelp', () => {
 
   it('handles narrow terms', async() => {
     await assertHelp({}, [
-      'Usage: mocha [options]',
+      'Usage: index.test [options]',
       '',
       'Options:',
       '  -h,--help  display',
@@ -174,7 +176,7 @@ describe('parseArgsWithHelp', () => {
     };
 
     await assertHelp(config, [
-      'Usage: mocha [options]',
+      'Usage: index.test [options]',
       '',
       'Options:',
       '  --foo <value>  (choices: "boo", "bar")',
@@ -183,7 +185,7 @@ describe('parseArgsWithHelp', () => {
 
     config.options.foo.description = 'Things';
     await assertHelp(config, [
-      'Usage: mocha [options]',
+      'Usage: index.test [options]',
       '',
       'Options:',
       '  --foo <value>  Things (choices: "boo", "bar")',
