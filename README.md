@@ -76,4 +76,4 @@ exiting.
 
 ---
 [![Tests](https://github.com/hildjj/minus-h/actions/workflows/node.js.yml/badge.svg)](https://github.com/hildjj/minus-h/actions/workflows/node.js.yml)
-[![codecov](https://codecov.io/gh/hildjj/minus-h/branch/main/graph/badge.svg?token=QQNMTT4XJQ)](https://codecov.io/gh/hildjj/minus-h)
+[![codecov](https://codecov.io/gh/hildjj/minus-h/graph/badge.svg?token=QQNMTT4XJQ)](https://codecov.io/gh/hildjj/minus-h)
