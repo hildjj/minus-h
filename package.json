@@ -6,10 +6,9 @@
   "type": "module",
   "scripts": {
     "docs": "typedoc",
-    "pretest": "tsc",
+    "pretest": "tsc --inlineSourceMap",
     "test": "c8 node --test test/*.test.js",
-    "preci": "tsc --inlineSourceMap",
-    "ci": "c8 node --test test/*.test.js",
+    "posttest": "tsc",
     "lint": "eslint .",
     "build": "npm test && npm run lint && npm run docs && npm pack --dry-run"
   },
