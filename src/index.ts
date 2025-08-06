@@ -149,8 +149,8 @@ export interface ParseArgsConfig {
  * Parsed command line arguments.  Defined strangely here because
  * ParsedResults is not made public in util.d.ts.
  */
-export type ParsedResults<T extends ParseArgsConfig>
-  = ReturnType<typeof parseArgs<T>>;
+export type ParsedResults<T extends ParseArgsConfig> =
+  ReturnType<typeof parseArgs<T>>;
 
 interface ParsedValues {
   [key: string]: boolean | string;
