@@ -68,7 +68,7 @@ describe('parseArgsWithHelp', () => {
     }
   });
 
-  it('errors on unexpected positionals', async() => {
+  it('errors on unexpected positionals', async () => {
     // Unexpected positionals
     const res = await run({
       args: ['foo', 'bar'],
@@ -88,7 +88,7 @@ describe('parseArgsWithHelp', () => {
     });
   });
 
-  it('generates help', async() => {
+  it('generates help', async () => {
     const opts = {
       width: 80,
     };
@@ -153,7 +153,7 @@ describe('parseArgsWithHelp', () => {
     ], opts);
   });
 
-  it('handles narrow terms', async() => {
+  it('handles narrow terms', async () => {
     await assertHelp({}, [
       'Usage: index.test [options]',
       '',
@@ -165,7 +165,7 @@ describe('parseArgsWithHelp', () => {
     ], {width: 10});
   });
 
-  it('handles choices', async() => {
+  it('handles choices', async () => {
     const config = {
       options: {
         foo: {
