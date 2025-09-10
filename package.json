@@ -28,18 +28,18 @@
     "url": "git+https://github.com/hildjj/minus-h.git"
   },
   "dependencies": {
-    "@cto.af/linewrap": "3.2.5"
+    "@cto.af/linewrap": "4.0.0"
   },
   "devDependencies": {
-    "@cto.af/eslint-config": "6.0.13",
-    "@types/node": "24.2.0",
+    "@cto.af/eslint-config": "6.0.14",
+    "@types/node": "24.3.1",
     "c8": "10.1.3",
-    "eslint": "9.32.0",
-    "typedoc": "0.28.9",
+    "eslint": "9.35.0",
+    "typedoc": "0.28.12",
     "typescript": "5.9.2",
-    "typescript-eslint": "8.39.0"
+    "typescript-eslint": "8.43.0"
   },
-  "packageManager": "pnpm@10.14.0",
+  "packageManager": "pnpm@10.15.1",
   "engines": {
     "node": ">=20"
   }
