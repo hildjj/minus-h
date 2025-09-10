@@ -1,6 +1,6 @@
 {
   "name": "minus-h",
-  "version": "3.0.2",
+  "version": "4.0.0",
   "description": "Add help generation to APIs created with Node's util.parseArgs function",
   "main": "lib/index.js",
   "type": "module",
