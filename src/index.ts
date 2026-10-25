@@ -275,6 +275,13 @@ function *generateHelp(
   }
 }
 
+/**
+ * Write the help text to stderr, and exit with code 64,
+ * because that's what programs used to do.
+ *
+ * @param config
+ * @param options
+ */
 export function usage(
   config?: ParseArgsConfig,
   options?: LineWrapOptions
